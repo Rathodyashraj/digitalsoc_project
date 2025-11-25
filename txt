@@ -1,0 +1,1383 @@
+inside src folder pasting comonents folder files
+
+import { motion } from 'framer-motion';
+
+interface ContentRendererProps {
+  content: string;
+}
+
+export default function ContentRenderer({ content }: ContentRendererProps) {
+  const formatContent = (text: string) => {
+    const lines = text.split('\n');
+    const formatted: JSX.Element[] = [];
+    let key = 0;
+
+    lines.forEach((line) => {
+      const trimmed = line.trim();
+
+      if (trimmed.startsWith('# ')) {
+        formatted.push(
+          <h1 key={key++} className="text-4xl md:text-5xl font-bold text-amber-900 mb-6 mt-8">
+            {trimmed.substring(2)}
+          </h1>
+        );
+      } else if (trimmed.startsWith('## ')) {
+        formatted.push(
+          <h2 key={key++} className="text-2xl md:text-3xl font-bold text-red-800 mb-4 mt-6">
+            {trimmed.substring(3)}
+          </h2>
+        );
+      } else if (trimmed.startsWith('### ')) {
+        formatted.push(
+          <h3 key={key++} className="text-xl md:text-2xl font-semibold text-amber-800 mb-3 mt-4">
+            {trimmed.substring(4)}
+          </h3>
+        );
+      } else if (trimmed.startsWith('- ')) {
+        formatted.push(
+          <li key={key++} className="text-gray-700 leading-relaxed ml-6 mb-2">
+            {trimmed.substring(2)}
+          </li>
+        );
+      } else if (trimmed.startsWith('* ')) {
+        formatted.push(
+          <li key={key++} className="text-gray-700 leading-relaxed ml-6 mb-2">
+            {trimmed.substring(2)}
+          </li>
+        );
+      } else if (trimmed.length > 0) {
+        formatted.push(
+          <p key={key++} className="text-gray-700 leading-relaxed mb-4 text-lg">
+            {trimmed}
+          </p>
+        );
+      } else {
+        formatted.push(<div key={key++} className="h-2" />);
+      }
+    });
+
+    return formatted;
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="prose prose-lg max-w-none"
+    >
+      {formatContent(content)}
+    </motion.div>
+  );
+}
+
+ContentRenderer.tsx
+
+
+import { motion } from 'framer-motion';
+
+export default function LoadingSpinner() {
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
+      <div className="text-center">
+        <motion.div
+          animate={{
+            rotate: 360,
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: 'linear',
+          }}
+          className="w-16 h-16 border-4 border-amber-200 border-t-red-600 rounded-full mx-auto mb-4"
+        />
+        <p className="text-amber-900 font-medium">Loading cultural treasures...</p>
+      </div>
+    </div>
+  );
+}
+
+LoadingSpinner.tsx
+
+
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { rajasthanCities } from '../data/cities';
+import { MapPin } from 'lucide-react';
+
+export default function RajasthanMap() {
+  const navigate = useNavigate();
+
+  const handleCityClick = (cityName: string) => {
+    navigate(`/city/${cityName.toLowerCase()}`);
+  };
+
+  return (
+    <div className="relative w-full max-w-5xl mx-auto px-4">
+      <div className="relative bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl shadow-2xl overflow-hidden border-4 border-amber-200">
+        <svg
+          viewBox="0 0 100 100"
+          className="w-full h-auto"
+          style={{ minHeight: '400px' }}
+        >
+          <defs>
+            <pattern id="desert-pattern" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="0.5" fill="#fbbf24" opacity="0.1" />
+              <circle cx="7" cy="7" r="0.5" fill="#f59e0b" opacity="0.1" />
+            </pattern>
+          </defs>
+
+          <path
+            d="M 15 25 Q 20 15, 35 18 Q 45 20, 55 15 Q 65 10, 75 20 Q 85 30, 85 45 Q 85 60, 75 70 Q 65 80, 50 85 Q 35 88, 25 80 Q 15 72, 12 60 Q 10 45, 15 25 Z"
+            fill="url(#desert-pattern)"
+            stroke="#d97706"
+            strokeWidth="0.5"
+            className="opacity-30"
+          />
+
+          {rajasthanCities.map((city, index) => (
+            <g key={city.name}>
+              <motion.g
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: index * 0.1, type: 'spring', stiffness: 200 }}
+              >
+                <motion.circle
+                  cx={city.x}
+                  cy={city.y}
+                  r="2.5"
+                  className="cursor-pointer"
+                  fill="#dc2626"
+                  stroke="#fff"
+                  strokeWidth="0.5"
+                  whileHover={{
+                    scale: 1.8,
+                    fill: '#991b1b',
+                  }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => handleCityClick(city.name)}
+                />
+
+                <motion.g
+                  initial={{ opacity: 0 }}
+                  whileHover={{ opacity: 1 }}
+                  className="pointer-events-none"
+                >
+                  <rect
+                    x={city.x - 12}
+                    y={city.y - 8}
+                    width="24"
+                    height="6"
+                    rx="1"
+                    fill="#7f1d1d"
+                    opacity="0.95"
+                  />
+                  <text
+                    x={city.x}
+                    y={city.y - 4.5}
+                    textAnchor="middle"
+                    className="text-[3px] font-semibold fill-white"
+                  >
+                    {city.name}
+                  </text>
+                </motion.g>
+              </motion.g>
+            </g>
+          ))}
+        </svg>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg"
+        >
+          <div className="flex items-center gap-2 text-amber-900">
+            <MapPin className="w-5 h-5" />
+            <p className="text-sm font-medium">
+              Click on any city to explore its Kathputli heritage
+            </p>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
+RajasthanMap.tsx
+
+
+now inside src we are in data folder 
+import { City } from '../types';
+
+export const rajasthanCities: City[] = [
+  {
+    name: 'Jaipur',
+    x: 60,
+    y: 45,
+    description: 'The Pink City - Center of traditional Kathputli art'
+  },
+  {
+    name: 'Udaipur',
+    x: 35,
+    y: 65,
+    description: 'City of Lakes - Home to royal puppet traditions'
+  },
+  {
+    name: 'Jodhpur',
+    x: 38,
+    y: 45,
+    description: 'The Blue City - Famous for folk puppet shows'
+  },
+  {
+    name: 'Bikaner',
+    x: 45,
+    y: 20,
+    description: 'Desert City - Ancient puppetry heritage'
+  },
+  {
+    name: 'Jaisalmer',
+    x: 25,
+    y: 35,
+    description: 'Golden City - Traditional desert puppet performances'
+  },
+  {
+    name: 'Ajmer',
+    x: 52,
+    y: 50,
+    description: 'Spiritual City - Rich in cultural puppet traditions'
+  },
+  {
+    name: 'Pushkar',
+    x: 50,
+    y: 52,
+    description: 'Sacred City - Famous for puppet fairs'
+  },
+  {
+    name: 'Kota',
+    x: 70,
+    y: 65,
+    description: 'Educational Hub - Preserving traditional arts'
+  }
+];
+
+cities.ts
+
+now we are in pages folder inside src
+
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ArrowLeft, BookOpen, Trophy, Video } from 'lucide-react';
+import { generateCityArticle } from '../services/gemini';
+import ContentRenderer from '../components/ContentRenderer';
+import LoadingSpinner from '../components/LoadingSpinner';
+
+export default function CityKnowledge() {
+  const { cityName } = useParams<{ cityName: string }>();
+  const navigate = useNavigate();
+  const [content, setContent] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [showOptions, setShowOptions] = useState(false);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      if (cityName) {
+        setLoading(true);
+        const capitalizedCity = cityName.charAt(0).toUpperCase() + cityName.slice(1);
+        const article = await generateCityArticle(capitalizedCity);
+        setContent(article);
+        setLoading(false);
+      }
+    };
+
+    fetchContent();
+  }, [cityName]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPercentage =
+        (window.scrollY + window.innerHeight) / document.documentElement.scrollHeight;
+
+      if (scrollPercentage > 0.85 && !showOptions) {
+        setShowOptions(true);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [showOptions]);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  const capitalizedCity = cityName?.charAt(0).toUpperCase() + cityName?.slice(1);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <motion.button
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 text-amber-900 hover:text-red-700 mb-8 font-medium transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to Map
+        </motion.button>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 mb-12"
+        >
+          <ContentRenderer content={content} />
+        </motion.div>
+
+        {showOptions && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 200 }}
+            className="bg-gradient-to-r from-red-700 to-amber-600 rounded-3xl shadow-2xl p-8 text-white mb-12"
+          >
+            <h2 className="text-3xl font-bold mb-4 text-center">
+              Want to dive deeper into Kathputli?
+            </h2>
+            <p className="text-center mb-8 text-amber-50">
+              Choose your path to explore more
+            </p>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate(`/city/${cityName}/tutorial`)}
+                className="bg-white text-amber-900 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all"
+              >
+                <BookOpen className="w-12 h-12 mx-auto mb-4 text-red-600" />
+                <h3 className="text-xl font-bold mb-2">Learn to Create</h3>
+                <p className="text-gray-700 text-sm">
+                  Step-by-step guide to making your own Kathputli
+                </p>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate(`/city/${cityName}/quiz`)}
+                className="bg-white text-amber-900 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all"
+              >
+                <Trophy className="w-12 h-12 mx-auto mb-4 text-amber-600" />
+                <h3 className="text-xl font-bold mb-2">Take a Quiz</h3>
+                <p className="text-gray-700 text-sm">
+                  Test your knowledge about {capitalizedCity}'s heritage
+                </p>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate(`/city/${cityName}/shows`)}
+                className="bg-white text-amber-900 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all"
+              >
+                <Video className="w-12 h-12 mx-auto mb-4 text-orange-600" />
+                <h3 className="text-xl font-bold mb-2">Watch Shows</h3>
+                <p className="text-gray-700 text-sm">
+                  View live and recorded puppet performances
+                </p>
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+CityKnowledge.tsx
+
+import { motion } from 'framer-motion';
+import RajasthanMap from '../components/RajasthanMap';
+import { Sparkles, MapPin, Book, Award } from 'lucide-react';
+
+export default function Home() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+      >
+        <section className="relative overflow-hidden py-20 px-4">
+          <div className="absolute inset-0 bg-gradient-to-r from-red-600/10 to-amber-600/10" />
+
+          <div className="max-w-6xl mx-auto relative z-10">
+            <motion.div
+              initial={{ y: -50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-center mb-16"
+            >
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 4, repeat: Infinity }}
+                className="inline-block mb-6"
+              >
+                <Sparkles className="w-16 h-16 text-amber-600 mx-auto" />
+              </motion.div>
+
+              <h1 className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-700 via-amber-600 to-orange-600 mb-6">
+                Kathputli Heritage
+              </h1>
+
+              <p className="text-xl md:text-2xl text-amber-900 font-medium mb-4">
+                Discover Rajasthan's Puppet Tradition
+              </p>
+
+              <p className="text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
+                Journey through the vibrant cities of Rajasthan and explore the ancient art of Kathputli puppetry.
+                Each city tells a unique story of craftsmanship, culture, and timeless traditions.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="mb-20"
+            >
+              <h2 className="text-3xl font-bold text-center text-amber-900 mb-8">
+                Explore the Map of Heritage
+              </h2>
+              <RajasthanMap />
+            </motion.div>
+
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="grid md:grid-cols-3 gap-8 mb-20"
+            >
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border-2 border-amber-200 hover:shadow-2xl transition-all">
+                <MapPin className="w-12 h-12 text-red-600 mb-4" />
+                <h3 className="text-2xl font-bold text-amber-900 mb-3">City Stories</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  Discover the unique Kathputli heritage of each Rajasthani city through rich, detailed articles.
+                </p>
+              </div>
+
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border-2 border-amber-200 hover:shadow-2xl transition-all">
+                <Book className="w-12 h-12 text-amber-600 mb-4" />
+                <h3 className="text-2xl font-bold text-amber-900 mb-3">Learn to Create</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  Follow step-by-step tutorials to craft your own authentic Kathputli puppet.
+                </p>
+              </div>
+
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border-2 border-amber-200 hover:shadow-2xl transition-all">
+                <Award className="w-12 h-12 text-orange-600 mb-4" />
+                <h3 className="text-2xl font-bold text-amber-900 mb-3">Test Your Knowledge</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  Take interactive quizzes and deepen your understanding of this ancient art form.
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        <footer className="bg-gradient-to-r from-red-900 to-amber-900 text-white py-8 px-4">
+          <div className="max-w-6xl mx-auto text-center">
+            <p className="text-lg font-medium mb-2">Kathputli Heritage</p>
+            <p className="text-amber-200">
+              Preserving the timeless art of Rajasthani puppetry for future generations
+            </p>
+          </div>
+        </footer>
+      </motion.div>
+    </div>
+  );
+}
+
+Home.tsx
+
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, CheckCircle2, XCircle, Trophy, RotateCcw } from 'lucide-react';
+import { generateQuiz } from '../services/gemini';
+import { QuizQuestion } from '../types';
+import LoadingSpinner from '../components/LoadingSpinner';
+
+export default function Quiz() {
+  const { cityName } = useParams<{ cityName: string }>();
+  const navigate = useNavigate();
+  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [answers, setAnswers] = useState<(number | null)[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  const [score, setScore] = useState(0);
+
+  useEffect(() => {
+    const fetchQuiz = async () => {
+      if (cityName) {
+        setLoading(true);
+        const capitalizedCity = cityName.charAt(0).toUpperCase() + cityName.slice(1);
+        const quizData = await generateQuiz(capitalizedCity);
+
+        try {
+          let parsed;
+          const jsonMatch = quizData.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            parsed = JSON.parse(jsonMatch[0]);
+          } else {
+            parsed = JSON.parse(quizData);
+          }
+
+          setQuestions(parsed.questions || []);
+          setAnswers(new Array(parsed.questions?.length || 0).fill(null));
+        } catch (error) {
+          console.error('Error parsing quiz:', error);
+          setQuestions([]);
+        }
+
+        setLoading(false);
+      }
+    };
+
+    fetchQuiz();
+  }, [cityName]);
+
+  const handleAnswerSelect = (answerIndex: number) => {
+    setSelectedAnswer(answerIndex);
+  };
+
+  const handleNext = () => {
+    if (selectedAnswer !== null) {
+      const newAnswers = [...answers];
+      newAnswers[currentQuestion] = selectedAnswer;
+      setAnswers(newAnswers);
+
+      if (currentQuestion < questions.length - 1) {
+        setCurrentQuestion(currentQuestion + 1);
+        setSelectedAnswer(answers[currentQuestion + 1]);
+      } else {
+        calculateScore(newAnswers);
+      }
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion(currentQuestion - 1);
+      setSelectedAnswer(answers[currentQuestion - 1]);
+    }
+  };
+
+  const calculateScore = (finalAnswers: (number | null)[]) => {
+    let correctCount = 0;
+    finalAnswers.forEach((answer, index) => {
+      if (answer === questions[index].correctAnswer) {
+        correctCount++;
+      }
+    });
+    setScore(correctCount);
+    setShowResults(true);
+  };
+
+  const resetQuiz = () => {
+    setCurrentQuestion(0);
+    setSelectedAnswer(null);
+    setAnswers(new Array(questions.length).fill(null));
+    setShowResults(false);
+    setScore(0);
+  };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center px-4">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 text-center max-w-md">
+          <XCircle className="w-16 h-16 text-red-600 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-amber-900 mb-4">Quiz Unavailable</h2>
+          <p className="text-gray-700 mb-6">
+            We couldn't load the quiz at this time. Please try again later.
+          </p>
+          <button
+            onClick={() => navigate(`/city/${cityName}`)}
+            className="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+          >
+            Back to Article
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const capitalizedCity = cityName?.charAt(0).toUpperCase() + cityName?.slice(1);
+
+  if (showResults) {
+    const percentage = Math.round((score / questions.length) * 100);
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
+        <div className="max-w-2xl mx-auto px-4 py-12">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 text-center"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+            >
+              <Trophy className="w-24 h-24 text-amber-600 mx-auto mb-6" />
+            </motion.div>
+
+            <h1 className="text-4xl font-bold text-amber-900 mb-4">Quiz Complete!</h1>
+
+            <div className="bg-gradient-to-r from-red-100 to-amber-100 rounded-2xl p-8 mb-8">
+              <p className="text-6xl font-bold text-red-700 mb-2">{percentage}%</p>
+              <p className="text-xl text-amber-900">
+                You scored {score} out of {questions.length}
+              </p>
+            </div>
+
+            {percentage >= 80 && (
+              <p className="text-lg text-green-700 font-semibold mb-6">
+                Excellent! You're a Kathputli expert!
+              </p>
+            )}
+            {percentage >= 60 && percentage < 80 && (
+              <p className="text-lg text-amber-700 font-semibold mb-6">
+                Great job! You know your Kathputli heritage well!
+              </p>
+            )}
+            {percentage < 60 && (
+              <p className="text-lg text-gray-700 font-semibold mb-6">
+                Keep learning! There's so much more to discover!
+              </p>
+            )}
+
+            <div className="flex flex-wrap gap-4 justify-center">
+              <button
+                onClick={resetQuiz}
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+              >
+                <RotateCcw className="w-5 h-5" />
+                Retake Quiz
+              </button>
+              <button
+                onClick={() => navigate(`/city/${cityName}/tutorial`)}
+                className="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+              >
+                Learn to Create
+              </button>
+              <button
+                onClick={() => navigate(`/city/${cityName}`)}
+                className="bg-gray-700 hover:bg-gray-800 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+              >
+                Back to Article
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
+  const currentQ = questions[currentQuestion];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
+      <div className="max-w-3xl mx-auto px-4 py-12">
+        <motion.button
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          onClick={() => navigate(`/city/${cityName}`)}
+          className="flex items-center gap-2 text-amber-900 hover:text-red-700 mb-8 font-medium transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to Article
+        </motion.button>
+
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-red-600 to-amber-600 rounded-3xl shadow-2xl p-6 mb-8 text-white"
+        >
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="text-2xl font-bold">{capitalizedCity} Kathputli Quiz</h1>
+            <span className="text-amber-100 font-semibold">
+              {currentQuestion + 1} / {questions.length}
+            </span>
+          </div>
+          <div className="w-full bg-white/30 rounded-full h-2">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+              className="bg-white h-2 rounded-full"
+              transition={{ duration: 0.3 }}
+            />
+          </div>
+        </motion.div>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentQuestion}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 mb-8"
+          >
+            <h2 className="text-2xl font-bold text-amber-900 mb-8">{currentQ.question}</h2>
+
+            <div className="space-y-4">
+              {currentQ.options.map((option, index) => (
+                <motion.button
+                  key={index}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleAnswerSelect(index)}
+                  className={`w-full text-left p-6 rounded-2xl border-2 transition-all ${
+                    selectedAnswer === index
+                      ? 'border-red-600 bg-red-50 shadow-lg'
+                      : 'border-gray-200 hover:border-amber-300 hover:bg-amber-50'
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
+                        selectedAnswer === index
+                          ? 'border-red-600 bg-red-600'
+                          : 'border-gray-300'
+                      }`}
+                    >
+                      {selectedAnswer === index && (
+                        <CheckCircle2 className="w-5 h-5 text-white" />
+                      )}
+                    </div>
+                    <span className="text-lg text-gray-800 flex-1">{option}</span>
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        <div className="flex justify-between">
+          <button
+            onClick={handlePrevious}
+            disabled={currentQuestion === 0}
+            className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 font-semibold px-6 py-3 rounded-xl transition-colors"
+          >
+            Previous
+          </button>
+          <button
+            onClick={handleNext}
+            disabled={selectedAnswer === null}
+            className="bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+          >
+            {currentQuestion === questions.length - 1 ? 'Finish' : 'Next'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Quiz.tsx
+
+import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Calendar, Clock, Video, Info } from 'lucide-react';
+import { Show } from '../types';
+
+export default function Shows() {
+  const { cityName } = useParams<{ cityName: string }>();
+  const navigate = useNavigate();
+
+  const capitalizedCity = cityName?.charAt(0).toUpperCase() + cityName?.slice(1);
+
+  const sampleShows: Show[] = [
+    {
+      id: '1',
+      title: 'The Legend of Prithviraj Chauhan',
+      date: '2024-03-15',
+      type: 'past',
+      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      description: 'A traditional Kathputli performance depicting the heroic tales of Rajput king Prithviraj Chauhan.'
+    },
+    {
+      id: '2',
+      title: 'Folk Tales of Rajasthan',
+      date: '2024-02-20',
+      type: 'past',
+      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      description: 'Collection of ancient folk stories brought to life through masterful puppetry.'
+    }
+  ];
+
+  const liveShows = sampleShows.filter(show => show.type === 'live');
+  const pastShows = sampleShows.filter(show => show.type === 'past');
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <motion.button
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          onClick={() => navigate(`/city/${cityName}`)}
+          className="flex items-center gap-2 text-amber-900 hover:text-red-700 mb-8 font-medium transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to Article
+        </motion.button>
+
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-red-600 to-amber-600 rounded-3xl shadow-2xl p-8 mb-12 text-white text-center"
+        >
+          <Video className="w-16 h-16 mx-auto mb-4" />
+          <h1 className="text-4xl font-bold mb-2">Kathputli Performances</h1>
+          <p className="text-amber-50 text-lg">
+            Watch live shows and recorded performances from {capitalizedCity}
+          </p>
+        </motion.div>
+
+        {liveShows.length > 0 && (
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mb-12"
+          >
+            <h2 className="text-3xl font-bold text-amber-900 mb-6 flex items-center gap-2">
+              <Clock className="w-8 h-8 text-red-600" />
+              Live & Upcoming Shows
+            </h2>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              {liveShows.map((show, index) => (
+                <motion.div
+                  key={show.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * index }}
+                  className="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-green-200"
+                >
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-4">
+                    <span className="inline-block bg-white text-green-700 font-bold px-4 py-1 rounded-full text-sm">
+                      LIVE
+                    </span>
+                  </div>
+
+                  <div className="p-6">
+                    <h3 className="text-2xl font-bold text-amber-900 mb-3">{show.title}</h3>
+
+                    <div className="flex items-center gap-2 text-gray-600 mb-4">
+                      <Calendar className="w-5 h-5" />
+                      <span>{new Date(show.date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}</span>
+                    </div>
+
+                    <p className="text-gray-700 mb-4">{show.description}</p>
+
+                    <button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition-colors">
+                      Join Live Stream
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.section>
+        )}
+
+        {pastShows.length > 0 ? (
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <h2 className="text-3xl font-bold text-amber-900 mb-6 flex items-center gap-2">
+              <Video className="w-8 h-8 text-amber-600" />
+              Past Performances
+            </h2>
+
+            <div className="space-y-6">
+              {pastShows.map((show, index) => (
+                <motion.div
+                  key={show.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * index }}
+                  className="bg-white rounded-2xl shadow-xl overflow-hidden"
+                >
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="aspect-video bg-gray-200">
+                      {show.videoUrl ? (
+                        <iframe
+                          src={show.videoUrl}
+                          title={show.title}
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Video className="w-16 h-16 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-6">
+                      <h3 className="text-2xl font-bold text-amber-900 mb-3">{show.title}</h3>
+
+                      <div className="flex items-center gap-2 text-gray-600 mb-4">
+                        <Calendar className="w-5 h-5" />
+                        <span>{new Date(show.date).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}</span>
+                      </div>
+
+                      <p className="text-gray-700">{show.description}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.section>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="bg-white rounded-2xl shadow-xl p-12 text-center"
+          >
+            <Info className="w-16 h-16 text-amber-600 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-amber-900 mb-4">No Shows Available</h3>
+            <p className="text-gray-700 mb-6 max-w-2xl mx-auto">
+              There are currently no live or recorded performances available for {capitalizedCity}.
+              Check back soon for upcoming shows and recorded performances!
+            </p>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <button
+                onClick={() => navigate(`/city/${cityName}/tutorial`)}
+                className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+              >
+                Learn to Create Puppets
+              </button>
+              <button
+                onClick={() => navigate(`/city/${cityName}/quiz`)}
+                className="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+              >
+                Take a Quiz
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="mt-12 bg-gradient-to-r from-amber-100 to-orange-100 rounded-2xl p-8 border-2 border-amber-300"
+        >
+          <h3 className="text-2xl font-bold text-amber-900 mb-4">Continue Your Journey</h3>
+          <div className="flex flex-wrap gap-4">
+            <button
+              onClick={() => navigate(`/city/${cityName}/tutorial`)}
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+            >
+              Make a Kathputli
+            </button>
+            <button
+              onClick={() => navigate(`/city/${cityName}/quiz`)}
+              className="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+            >
+              Test Your Knowledge
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="bg-gray-700 hover:bg-gray-800 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+            >
+              Explore Another City
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
+Shows.tsx
+
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { generateTutorial } from '../services/gemini';
+import ContentRenderer from '../components/ContentRenderer';
+import LoadingSpinner from '../components/LoadingSpinner';
+
+export default function Tutorial() {
+  const { cityName } = useParams<{ cityName: string }>();
+  const navigate = useNavigate();
+  const [content, setContent] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      if (cityName) {
+        setLoading(true);
+        const capitalizedCity = cityName.charAt(0).toUpperCase() + cityName.slice(1);
+        const tutorial = await generateTutorial(capitalizedCity);
+        setContent(tutorial);
+        setLoading(false);
+      }
+    };
+
+    fetchContent();
+  }, [cityName]);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <motion.button
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          onClick={() => navigate(`/city/${cityName}`)}
+          className="flex items-center gap-2 text-amber-900 hover:text-red-700 mb-8 font-medium transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to Article
+        </motion.button>
+
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-red-600 to-amber-600 rounded-3xl shadow-2xl p-8 mb-8 text-white text-center"
+        >
+          <CheckCircle2 className="w-16 h-16 mx-auto mb-4" />
+          <h1 className="text-4xl font-bold mb-2">Make Your Own Kathputli</h1>
+          <p className="text-amber-50 text-lg">
+            A hands-on guide to creating an authentic Rajasthani puppet
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 mb-12"
+        >
+          <ContentRenderer content={content} />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-2xl p-8 border-2 border-amber-300"
+        >
+          <h3 className="text-2xl font-bold text-amber-900 mb-4">Ready for More?</h3>
+          <div className="flex flex-wrap gap-4">
+            <button
+              onClick={() => navigate(`/city/${cityName}/quiz`)}
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+            >
+              Test Your Knowledge
+            </button>
+            <button
+              onClick={() => navigate(`/city/${cityName}/shows`)}
+              className="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+            >
+              Watch Performances
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="bg-gray-700 hover:bg-gray-800 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+            >
+              Explore Another City
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
+Tutorial.tsx
+
+now we are in services folder inside src
+
+import axios from 'axios';
+
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+
+export const generateCityArticle = async (cityName: string): Promise<string> => {
+  try {
+    const prompt = `Generate a detailed, engaging blog-style article about the Kathputli (puppet) history, culture, uniqueness, and puppetry heritage of ${cityName} in Rajasthan, India. Include information about:
+    - Historical significance of Kathputli in this city
+    - Cultural importance and traditions
+    - Unique characteristics of puppetry in this region
+    - Famous puppeteers or families
+    - Materials and techniques used
+    - Current state and preservation efforts
+
+    Format with clear sections and make it informative yet captivating. Write approximately 800-1000 words.`;
+
+    const response = await axios.post(
+      `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
+      {
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }]
+      }
+    );
+
+    return response.data.candidates[0].content.parts[0].text;
+  } catch (error) {
+    console.error('Error generating city article:', error);
+    return `# ${cityName} - Kathputli Heritage\n\nThe ancient city of ${cityName} holds a special place in Rajasthan's rich Kathputli tradition. This traditional form of puppetry has been passed down through generations, with master craftsmen creating intricate puppets that tell stories of valor, romance, and folklore.\n\nThe puppeteers of ${cityName} are known for their exceptional skill in bringing these wooden figures to life, using strings and traditional folk songs to captivate audiences. The vibrant costumes, detailed craftsmanship, and storytelling prowess make the Kathputli shows of ${cityName} truly unforgettable.\n\nToday, efforts are being made to preserve this ancient art form and pass it on to future generations.`;
+  }
+};
+
+export const generateTutorial = async (cityName: string): Promise<string> => {
+  try {
+    const prompt = `Provide a detailed step-by-step tutorial on how a beginner can make an authentic Rajasthani Kathputli puppet, specifically in the style of ${cityName}. Include:
+    - Materials needed (easily available items)
+    - 8-10 clear steps with detailed instructions
+    - Tips for beginners
+    - Traditional techniques
+
+    Format each step clearly with a title and detailed description. Make it practical and achievable for beginners.`;
+
+    const response = await axios.post(
+      `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
+      {
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }]
+      }
+    );
+
+    return response.data.candidates[0].content.parts[0].text;
+  } catch (error) {
+    console.error('Error generating tutorial:', error);
+    return `# How to Make a Kathputli Puppet\n\n## Materials Needed\n- Wooden sticks or dowels\n- Fabric scraps (colorful)\n- Thread and needle\n- Strings\n- Paint and brushes\n- Cotton for stuffing\n\n## Step 1: Create the Head\nCarve or shape a wooden ball into a puppet head. Paint facial features with traditional Rajasthani designs.\n\n## Step 2: Make the Body\nUse fabric to create a traditional dress. Stuff with cotton to give it volume.\n\n## Step 3: Attach Strings\nConnect strings to the head, hands, and body for movement control.\n\n## Step 4: Add Details\nDecorate with mirrors, beads, and traditional embroidery.`;
+  }
+};
+
+export const generateQuiz = async (cityName: string): Promise<string> => {
+  try {
+    const prompt = `Generate a 7-question multiple-choice quiz to test knowledge about Kathputli tradition in ${cityName}, Rajasthan.
+
+    For each question provide:
+    - The question text
+    - 4 options (A, B, C, D)
+    - Indicate the correct answer
+
+    Make questions interesting and educational, covering history, techniques, cultural significance, and famous aspects of Kathputli in ${cityName}.
+
+    Format as JSON with this structure:
+    {
+      "questions": [
+        {
+          "question": "Question text?",
+          "options": ["Option A", "Option B", "Option C", "Option D"],
+          "correctAnswer": 0
+        }
+      ]
+    }`;
+
+    const response = await axios.post(
+      `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
+      {
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }]
+      }
+    );
+
+    return response.data.candidates[0].content.parts[0].text;
+  } catch (error) {
+    console.error('Error generating quiz:', error);
+    return JSON.stringify({
+      questions: [
+        {
+          question: `What is the primary material used for making traditional Kathputli puppets in ${cityName}?`,
+          options: ["Wood", "Clay", "Metal", "Plastic"],
+          correctAnswer: 0
+        },
+        {
+          question: "How are Kathputli puppets controlled?",
+          options: ["Remote control", "Hand inside the puppet", "Strings attached to sticks", "Magnets"],
+          correctAnswer: 2
+        },
+        {
+          question: "What language are traditional Kathputli performances usually conducted in?",
+          options: ["Hindi", "English", "Rajasthani", "Sanskrit"],
+          correctAnswer: 2
+        },
+        {
+          question: "Which royal family is known for patronizing Kathputli art?",
+          options: ["Mughal", "Rajput", "Maratha", "Gupta"],
+          correctAnswer: 1
+        },
+        {
+          question: "What type of stories do Kathputli performances typically tell?",
+          options: ["Modern news", "Folk tales and historical legends", "Science fiction", "Crime dramas"],
+          correctAnswer: 1
+        }
+      ]
+    });
+  }
+};
+
+gemini.ts
+
+now we are in types.ts inside src
+
+export interface City {
+  name: string;
+  x: number;
+  y: number;
+  description: string;
+}
+
+export interface QuizQuestion {
+  question: string;
+  options: string[];
+  correctAnswer: number;
+}
+
+export interface Quiz {
+  questions: QuizQuestion[];
+}
+
+export interface TutorialStep {
+  stepNumber: number;
+  title: string;
+  description: string;
+  materials?: string[];
+}
+
+export interface Show {
+  id: string;
+  title: string;
+  date: string;
+  type: 'live' | 'past';
+  videoUrl?: string;
+  description: string;
+}
+
+index.ts
+
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import CityKnowledge from './pages/CityKnowledge';
+import Tutorial from './pages/Tutorial';
+import Quiz from './pages/Quiz';
+import Shows from './pages/Shows';
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/city/:cityName" element={<CityKnowledge />} />
+        <Route path="/city/:cityName/tutorial" element={<Tutorial />} />
+        <Route path="/city/:cityName/quiz" element={<Quiz />} />
+        <Route path="/city/:cityName/shows" element={<Shows />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
+
+app.tsx
+
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App.tsx';
+import './index.css';
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>
+);
+
+main.tsx
+
+
+
+
+{
+  "name": "vite-react-typescript-starter",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.4",
+    "axios": "^1.13.2",
+    "framer-motion": "^12.23.24",
+    "lucide-react": "^0.344.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.9.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.1",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.18",
+    "eslint": "^9.9.1",
+    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
+    "eslint-plugin-react-refresh": "^0.4.11",
+    "globals": "^15.9.0",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.3.0",
+    "vite": "^5.4.2"
+  }
+}
+
+package.json
+
+these are the files
